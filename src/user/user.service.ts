@@ -56,14 +56,19 @@ export class UserService {
     const users = [];
 
     usersData.forEach((doc) => {
-      // Get the data of the document
       const userData = doc.data();
 
-      // Exclude the password field
+      console.log(doc.id);
+      const userId = doc.id;
+
       const { password, ...userWithoutPassword } = userData;
 
-      // Add the user without the password to the array
-      users.push(userWithoutPassword);
+      const user = {
+        id: userId,
+        ...userWithoutPassword,
+      };
+
+      users.push(user);
     });
 
     return users;
