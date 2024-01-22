@@ -4,6 +4,7 @@ import { CreateUserDto } from 'src/dtos/create-user.dto';
 import { db } from 'src/main';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import { User } from './user.model';
 
 const scrypt = promisify(_scrypt);
 
@@ -11,7 +12,7 @@ const scrypt = promisify(_scrypt);
 export class UserService {
   userCollection = db.collection('utenti');
 
-  async addUser(@Body() input: CreateUserDto): Promise<any> {
+  async addUser(@Body() input: CreateUserDto): Promise<User> {
     const user = await this.userCollection
       .where('email', '==', input.email)
       .get();
@@ -40,17 +41,11 @@ export class UserService {
       };
       await this.userCollection.add(data);
 
-      return {
-        nome: input.nome,
-        cognome: input.cognome,
-        email: input.email,
-        numeroTessera: input.numeroTessera,
-        ruolo: input.ruolo,
-      };
+      return data;
     }
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<User[]> {
     const usersData = await this.userCollection.get();
 
     const users = [];
@@ -58,7 +53,6 @@ export class UserService {
     usersData.forEach((doc) => {
       const userData = doc.data();
 
-      console.log(doc.id);
       const userId = doc.id;
 
       const { password, ...userWithoutPassword } = userData;
@@ -72,5 +66,26 @@ export class UserService {
     });
 
     return users;
+  }
+
+  async getUserById(id: string): Promise<User> {
+    const userDoc = await this.userCollection.doc(id);
+    console.log(userDoc.get());
+
+    const user = (await userDoc.get()).data();
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      nome: userWithoutPassword.nome,
+      cognome: userWithoutPassword.cognome,
+      email: userWithoutPassword.email,
+      ruolo: userWithoutPassword.ruolo,
+      numeroTessera: userWithoutPassword.numeroTessera,
+    };
+  }
+
+  async delete(id: string) {
+    const userDoc = await this.userCollection.doc(id).delete();
   }
 }
