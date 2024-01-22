@@ -49,4 +49,23 @@ export class UserService {
       };
     }
   }
+
+  async getAllUsers() {
+    const usersData = await this.userCollection.get();
+
+    const users = [];
+
+    usersData.forEach((doc) => {
+      // Get the data of the document
+      const userData = doc.data();
+
+      // Exclude the password field
+      const { password, ...userWithoutPassword } = userData;
+
+      // Add the user without the password to the array
+      users.push(userWithoutPassword);
+    });
+
+    return users;
+  }
 }
