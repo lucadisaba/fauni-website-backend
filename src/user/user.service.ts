@@ -5,6 +5,7 @@ import { db } from 'src/main';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { User } from './user.model';
+import { UpdateUserDto } from 'src/dtos/update-user.dto';
 
 const scrypt = promisify(_scrypt);
 
@@ -87,5 +88,43 @@ export class UserService {
 
   async delete(id: string) {
     const userDoc = await this.userCollection.doc(id).delete();
+  }
+
+  async update(id: string, input: UpdateUserDto) {
+    const doc = await this.userCollection.doc(id);
+
+    const existingUserWithTessera = await this.userCollection
+      .where('numeroTessera', '==', input.numeroTessera)
+      .get();
+    const existingUserWithEmail = await this.userCollection
+      .where('email', '==', input.email)
+      .get();
+
+    existingUserWithTessera.forEach((doc) => {
+      if (doc.id !== id) {
+        throw new BadRequestException(
+          'Numero di tessera già in uso da un altro utente.',
+        );
+      }
+    });
+
+    existingUserWithEmail.forEach((doc) => {
+      if (doc.id !== id) {
+        throw new BadRequestException('Email già in uso da un altro utente.');
+      }
+    });
+
+    console.log(id, input);
+    if (input.password) {
+      const salt = randomBytes(8).toString('hex');
+
+      const hash = (await scrypt(input.password, salt, 32)) as Buffer;
+
+      const hashedPassword = salt + '.' + hash.toString('hex');
+
+      input.password = hashedPassword;
+    }
+    const res = await doc.set(input, { merge: true });
+    return res;
   }
 }
