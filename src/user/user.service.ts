@@ -71,7 +71,25 @@ export class UserService {
 
   async getUserById(id: string): Promise<User> {
     const userDoc = await this.userCollection.doc(id);
-    console.log(userDoc.get());
+
+    const user = (await userDoc.get()).data();
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      nome: userWithoutPassword.nome,
+      cognome: userWithoutPassword.cognome,
+      email: userWithoutPassword.email,
+      ruolo: userWithoutPassword.ruolo,
+      numeroTessera: userWithoutPassword.numeroTessera,
+    };
+  }
+
+  async whoami(id: string) {
+    if (!id) {
+      return null;
+    }
+    const userDoc = await this.userCollection.doc(id);
 
     const user = (await userDoc.get()).data();
 
@@ -114,7 +132,6 @@ export class UserService {
       }
     });
 
-    console.log(id, input);
     if (input.password) {
       const salt = randomBytes(8).toString('hex');
 
