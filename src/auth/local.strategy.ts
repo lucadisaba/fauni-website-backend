@@ -1,23 +1,24 @@
 import {
-  Injectable,
   BadRequestException,
+  Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy } from 'passport-local';
+import { db } from 'src/main';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
-import { UserService } from './user.service';
-import { db } from 'src/main';
-import { User } from './user.model';
 
 const scrypt = promisify(_scrypt);
-
 @Injectable()
-export class AuthService {
-  constructor(private usersService: UserService) {}
-
+export class LocalStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super();
+  }
+  private readonly logger = new Logger(LocalStrategy.name);
   userCollection = db.collection('utenti');
-
-  async signin(email: string, password: string): Promise<User> {
+  public async validate(email: string, password: string): Promise<any> {
     const user = await this.userCollection.where('email', '==', email).get();
 
     if (user.empty) {
