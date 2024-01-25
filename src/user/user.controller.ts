@@ -3,17 +3,19 @@ import {
   Controller,
   Delete,
   Get,
-  Inject,
+  Request,
   Param,
   Patch,
   Post,
   Session,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from 'src/dtos/create-user.dto';
 import { User } from './user.model';
 import { UpdateUserDto } from 'src/dtos/update-user.dto';
-import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('user')
 export class UserController {
@@ -41,6 +43,12 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(@Request() request) {
+    return request.user;
+  }
+
   @Get(':id')
   getUserById(@Param('id') userId: string): Promise<User> {
     return this.userService.getUserById(userId);
@@ -56,15 +64,12 @@ export class UserController {
     session.userId = null;
   }
 
-  @Post('/login')
-  async login(
-    @Body('email') email: string,
-    @Body('password') password: string,
-    @Session() session: any,
-  ): Promise<User> {
-    const user = await this.authService.signin(email, password);
-    session.userId = user.id;
-    console.log(session);
-    return user;
+  @Post('login')
+  @UseGuards(AuthGuard('local'))
+  async login(@Request() request) {
+    return {
+      userId: request.user.id,
+      token: this.authService.getTokenForUser(request.user),
+    };
   }
 }
