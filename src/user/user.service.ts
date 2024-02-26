@@ -13,18 +13,18 @@ const scrypt = promisify(_scrypt);
 export class UserService {
   userCollection = db.collection('utenti');
 
-  async addUser(@Body() input: CreateUserDto): Promise<User> {
+  async addUser(@Body() input: CreateUserDto): Promise<string> {
     const user = await this.userCollection
       .where('email', '==', input.email)
       .get();
 
-    const numeroTessera = await this.userCollection
-      .where('numeroTessera', '==', input.numeroTessera)
+    const cardNumber = await this.userCollection
+      .where('cardNumber', '==', input.cardNumber)
       .get();
 
     if (!user.empty) {
       throw new BadRequestException('email già in uso');
-    } else if (!numeroTessera.empty) {
+    } else if (!cardNumber.empty) {
       throw new BadRequestException('numero tessera già in uso');
     } else {
       const salt = randomBytes(8).toString('hex');
@@ -33,16 +33,16 @@ export class UserService {
 
       const hashedPassword = salt + '.' + hash.toString('hex');
       const data = {
-        nome: input.nome,
-        cognome: input.cognome,
+        name: input.name,
+        surname: input.surname,
         email: input.email,
         password: hashedPassword,
-        numeroTessera: input.numeroTessera,
-        ruolo: input.ruolo,
+        cardNumber: input.cardNumber,
+        role: input.role,
       };
       await this.userCollection.add(data);
 
-      return data;
+      return `Utente ${data.name} ${data.surname} inserito correttamente`; 
     }
   }
 
@@ -77,11 +77,11 @@ export class UserService {
     const { password, ...userWithoutPassword } = user;
 
     return {
-      nome: userWithoutPassword.nome,
-      cognome: userWithoutPassword.cognome,
+      name: userWithoutPassword.name,
+      surname: userWithoutPassword.surname,
       email: userWithoutPassword.email,
-      ruolo: userWithoutPassword.ruolo,
-      numeroTessera: userWithoutPassword.numeroTessera,
+      role: userWithoutPassword.role,
+      cardNumber: userWithoutPassword.cardNumber,
     };
   }
 
@@ -96,11 +96,11 @@ export class UserService {
     const { password, ...userWithoutPassword } = user;
 
     return {
-      nome: userWithoutPassword.nome,
-      cognome: userWithoutPassword.cognome,
+      name: userWithoutPassword.name,
+      surname: userWithoutPassword.surname,
       email: userWithoutPassword.email,
-      ruolo: userWithoutPassword.ruolo,
-      numeroTessera: userWithoutPassword.numeroTessera,
+      role: userWithoutPassword.role,
+      cardNumber: userWithoutPassword.cardNumber,
     };
   }
 
@@ -112,7 +112,7 @@ export class UserService {
     const doc = await this.userCollection.doc(id);
 
     const existingUserWithTessera = await this.userCollection
-      .where('numeroTessera', '==', input.numeroTessera)
+      .where('cardNumber', '==', input.cardNumber)
       .get();
     const existingUserWithEmail = await this.userCollection
       .where('email', '==', input.email)

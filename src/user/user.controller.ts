@@ -9,13 +9,18 @@ import {
   Post,
   Session,
   UseGuards,
+  Res,
+  Req,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from 'src/dtos/create-user.dto';
 import { User } from './user.model';
 import { UpdateUserDto } from 'src/dtos/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from './auth.service';
+import { Response } from 'express';
+import { UserLoginDTO } from 'src/dtos/user-login.dto';
 
 @Controller('user')
 export class UserController {
@@ -34,7 +39,7 @@ export class UserController {
     return this.userService.update(userId, updateUserDto);
   }
   @Post()
-  addUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  addUser(@Body() createUserDto: CreateUserDto): Promise<string> {
     return this.userService.addUser(createUserDto);
   }
 
@@ -64,12 +69,10 @@ export class UserController {
     session.userId = null;
   }
 
-  @Post('login')
-  @UseGuards(AuthGuard('local'))
-  async login(@Request() request) {
-    return {
-      userId: request.user.id,
-      token: this.authService.getTokenForUser(request.user),
-    };
+  @Post('/login')
+  async authorize(@Req() req: Request, @Body() user: UserLoginDTO, @Res() res: Response): Promise<any> {
+    const jwt = await this.authService.signin(user.email, user.password);
+    res.setHeader('Authorization', 'Bearer ' + jwt.access_token);
+    return res.json(jwt);
   }
 }

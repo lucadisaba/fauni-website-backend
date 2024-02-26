@@ -36,11 +36,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
       return {
         id: doc.id,
-        nome: doc.data().nome,
-        cognome: doc.data().cognome,
+        name: doc.data().name,
+        surname: doc.data().surname,
         email: doc.data().email,
-        numeroTessera: doc.data().numeroTessera,
-        ruolo: doc.data().ruolo,
+        cardNumber: doc.data().cardNumber,
+        role: doc.data().role,
       };
     });
 

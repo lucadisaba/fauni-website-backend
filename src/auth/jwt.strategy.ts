@@ -6,7 +6,7 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  userCollection = db.collection('utenti');
+  userCollection = db.collection('users');
 
   constructor(private readonly userService: UserService) {
     super({
@@ -24,11 +24,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { password, ...userWithoutPassword } = user;
 
     return {
-      nome: userWithoutPassword.nome,
-      cognome: userWithoutPassword.cognome,
+      name: userWithoutPassword.name,
+      surname: userWithoutPassword.surname,
       email: userWithoutPassword.email,
-      ruolo: userWithoutPassword.ruolo,
-      numeroTessera: userWithoutPassword.numeroTessera,
+      role: userWithoutPassword.role,
+      cardNumber: userWithoutPassword.cardNumber,
     };
   }
 }

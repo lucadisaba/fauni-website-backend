@@ -1,3 +1,3 @@
-export enum systemRole {
-    AMMINISTRATORE, PRESIDENTE, MEMBRO, TESSERATO, GUEST
+export enum systemRoles {
+    ADMIN, PRESIDENT, MEMBER, ASSOCIATE, GUEST
 }
