@@ -3,10 +3,10 @@ import { min } from 'rxjs';
 
 export class CreateUserDto {
     @IsString()
-    nome: string;
+    name: string;
 
     @IsString()
-    cognome: string;
+    surname: string;
 
     @IsEmail()
     email: string;
@@ -16,8 +16,8 @@ export class CreateUserDto {
     password: string;
 
     @IsNumber()
-    numeroTessera: number;
+    cardNumber: number;
 
     @IsString()
-    ruolo: string
+    role: string
 }

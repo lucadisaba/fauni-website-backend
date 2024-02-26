@@ -8,10 +8,10 @@ import {
 
 export class UpdateUserDto {
   @IsString()
-  nome?: string;
+  name?: string;
 
   @IsString()
-  cognome?: string;
+  surname?: string;
 
   @IsEmail()
   email?: string;
@@ -22,8 +22,8 @@ export class UpdateUserDto {
   password?: string;
 
   @IsNumber()
-  numeroTessera?: number;
+  cardNumber?: number;
 
   @IsString()
-  ruolo?: string;
+  role?: string;
 }
